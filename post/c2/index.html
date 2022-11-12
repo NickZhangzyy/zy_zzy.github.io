@@ -1,0 +1,815 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>c2 | dengbowang</title>
+<link rel="shortcut icon" href="https://dengbowang.github.io//favicon.ico?v=1668247441699">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://dengbowang.github.io//styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="c2 | dengbowang - Atom Feed" href="https://dengbowang.github.io//atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="C语言高级特性
+前面我们了解了C语言的相关基础内容，我们来看看C语言的高级部分。这一章的学习难道会比较大，尤其是指针板块，因为需要理解计算机内存模型，所以说是很多初学者的噩梦。
+函数
+其实函数我们在一开始就在使用了：
+int main() ..." />
+    <meta name="keywords" content="C" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://dengbowang.github.io/">
+  <img class="avatar" src="https://dengbowang.github.io//images/avatar.png?v=1668247441699" alt="">
+  </a>
+  <h1 class="site-title">
+    dengbowang
+  </h1>
+  <p class="site-description">
+    以自然之眼观物，以自然之舌言情。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              c2
+            </h2>
+            <div class="post-info">
+              <span>
+                2022-11-06
+              </span>
+              <span>
+                35 min read
+              </span>
+              
+                <a href="https://dengbowang.github.io/tag/PlEOWH6GU/" class="post-tag">
+                  # C
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content" v-pre>
+                <h1 id="c语言高级特性">C语言高级特性</h1>
+<p>前面我们了解了C语言的相关基础内容，我们来看看C语言的高级部分。这一章的学习难道会比较大，尤其是指针板块，因为需要理解计算机内存模型，所以说是很多初学者的噩梦。</p>
+<h2 id="函数">函数</h2>
+<p>其实函数我们在一开始就在使用了：</p>
+<pre><code class="language-c">int main() {   //这是定义函数
+   ...
+}
+</code></pre>
+<p>我们程序的入口点就是<code>main</code>函数，我们只需要将我们的程序代码编写到主函数中就可以运行了，不够这个函数只是由我们来定义，而不是我们自己来调用。当然，除了主函数之外，我们一直在使用的<code>printf</code>也是一个函数，不过这个函数是标准库中已经实现好了的，现在是我们在调用这个函数：</p>
+<pre><code class="language-c">printf(&quot;Hello World!&quot;);    //直接通过 函数名称(参数...) 的形式调用函数
+</code></pre>
+<p>那么，函数的具体定义是什么呢？</p>
+<blockquote>
+<p>函数是完成特定任务的独立程序代码单元。</p>
+</blockquote>
+<p>其实简单来说，函数时为了完成某件任务而生的，可能我们要完成某个任务并不是一行代码就可以搞定的，但是现在可能会遇到这种情况：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main() {
+    int a = 10;
+    
+    printf(&quot;H&quot;);   //比如下面这三行代码就是我们要做的任务
+    printf(&quot;A&quot;);
+    a += 10;
+    
+    if(a &gt; 20) {
+        printf(&quot;H&quot;);   //这里我们还需要执行这个任务
+        printf(&quot;A&quot;);
+        a += 10;
+    }
+
+    switch (a) {
+        case 30:
+            printf(&quot;H&quot;);   //这里又要执行这个任务
+            printf(&quot;A&quot;);
+            a += 10;
+            
+    }
+}
+</code></pre>
+<p>我们每次要做这个任务时，都要完完整整地将任务的每一行代码都写下来，如果我们的程序中多处都需要执行这个任务，每个地方都完整地写一遍，实在是太臃肿了，有没有一种更好的办法能优化我们的代码呢？</p>
+<p>这时我们就可以考虑使用函数了，我们可以将我们的程序逻辑代码全部编写到函数中，当我们执行函数时，实际上执行的就是函数中的全部内容，也就是按照我们制定的规则执行对应的任务，每次需要做这个任务时，只需要调用函数即可。</p>
+<p>我们来看看，如何创建和使用函数。</p>
+<h3 id="创建和使用函数">创建和使用函数</h3>
+<p>首先我们来看看如何创建一个函数，其实创建一个函数是很简单的，格式如下：</p>
+<pre><code class="language-c">返回值类型 函数名称([函数参数...]);
+</code></pre>
+<p>其中函数名称也是有要求的，并不是所有的字符都可以用作函数名称，它的命名规则与变量的命名规则基本一致，所以这里就不一一列出了。</p>
+<p>函数不仅仅需要完成我们的任务，可能某些函数还需要告诉我们结果，比如我们之前认识的<code>getchar</code>函数，这个函数实际上返回了一个int值作为结果（也就是我们输入的字符）我们同样可以将函数返回的结果赋值给变量或是参与运算等等。</p>
+<p>当然如果我们的函数只需要完成任务，不需要告诉我们结果，返回值类型可以写成<code>void</code>表示为空。</p>
+<p>函数参数我们放在下一个小节中讲解，所以这里我们不使用任何参数，所以这里也将参数设定为<code>void</code>表示没有参数（当然为了方便，我们也可以直接什么都不写）</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test(void);   //定义函数原型，因为C语言是从上往下的，所以如果要在下面的主函数中使用这个函数，一定要定义到它的上面。
+
+int main() {
+    
+}
+
+void test(void){   //函数具体定义，添加一个花括号并在其中编写程序代码，就和我们之前在main中编写一样
+    printf(&quot;我是测试函数!&quot;);
+}
+</code></pre>
+<p>或是直接在上方写上函数的具体定义：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test(void){   //函数具体定义，添加一个花括号并在其中编写程序代码，就和我们之前在main中编写一样
+    printf(&quot;我是测试函数!&quot;);
+}
+
+int main() {
+    
+}
+</code></pre>
+<p>那么现在我们将函数定义好之后，该如何去使用呢？</p>
+<pre><code class="language-c">int main() {
+    test();   //这里我们只需要使用 函数名称(); 就可以调用函数了
+  	printf(&quot;Hello World!&quot;);   //实际上printf也是一个函数，功能是向控制台打印字符串，只不过这个函数是系统提供的，已经提前实现好了，其中的参数我们后续还会进行介绍。
+}
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://s2.loli.net/2022/06/19/s1uqceI3g6kFiXa.png" alt="image-20220619224057060" loading="lazy"></figure>
+<p>这样，我们就可以很好解决上面的代码复用性的问题，我们只需要将会重复使用的逻辑代码定义到函数中，当我们需要执行时，直接调用编写好的函数就可以了，这样是不是简单多了？</p>
+<pre><code class="language-c">int main() {
+    int a = 10;
+
+    test();   //多次使用的情况下，函数会让我们的程序简单很多
+
+    if(a &gt; 20) test();
+
+    switch (a) {
+        case 30:
+            test();
+    }
+}
+</code></pre>
+<p>当然函数除了可以实现代码的复用之外，也可以优化我们的程序，让我们的代码写得更有层次感，我们的程序可能会有很多很多的功能，需要写很多的代码，但是谁愿意去看一个几百行上千行的<code>main</code>函数呢？我们可以将每个功能都写到一个对应的函数中，这样就可以大大减少<code>main</code>函数中的代码量了。</p>
+<pre><code class="language-c">int main() {
+    func1();   //直接把多行代码写到一个函数中，在main中调用对应的函数，这样能够大幅度减少代码量
+    func2();
+    func3();
+}
+</code></pre>
+<p>而我们从一开始就在编写main函数实际上是一种比较特殊的函数，C语言规定程序一律从主函数开始执行，所以这也是为什么我们一定要写成<code>int main()</code>的形式。</p>
+<h3 id="全局变量和局部变量">全局变量和局部变量</h3>
+<p>现在我们已经了解了如何创建和调用函数，在继续学习后续内容之前，我们需要先认识一下全局变量和局部变量这两个概念（啊这，变量就变量，还分这么细啊？）</p>
+<p>我们首先来看看局部变量，实际上我们之前使用的都是局部变量，比如：</p>
+<pre><code class="language-c">int main() {
+    int i = 10;   //这里定义的变量i实际上是main函数中的局部变量，它的作用域只能是main函数中，也就是说其他地方是无法使用的
+}
+</code></pre>
+<p>局部变量只会在其作用域中生效：</p>
+<figure data-type="image" tabindex="2"><img src="https://s2.loli.net/2022/06/21/1sTwRq95uWce3Az.png" alt="image-20220621104906130" loading="lazy"></figure>
+<p>可以看到在其他函数中，无法使用main函数中的变量，因为局部变量的作用域是有限的，比如位于某个函数内部的变量，那么它的作用域就是整个函数内部，而在其他位置均无法访问。又比如我们之前学习的for循环，当我们这样定义时：</p>
+<figure data-type="image" tabindex="3"><img src="https://s2.loli.net/2022/06/21/NohbirYPSBVLQap.png" alt="image-20220621110340649" loading="lazy"></figure>
+<p>可以看到，在for循环中定义的变量i，只能在for循环内部使用，而出了这个花括号之后就用不了了，当然由于作用域不同，所以下面这种写法是完全没问题的：</p>
+<pre><code class="language-c">int main() {
+    for (int i = 0; i &lt; 10; ++i) {   //虽然这里写了两个for都使用了i，但是由于处于两个不同的作用域，所以这两个i半毛钱关系都没有
+
+    }
+
+    for (int i = 0; i &lt; 20; ++i) {
+
+    }
+}
+</code></pre>
+<p>所以，清楚了局部变量的作用域之后，我们在编写程序的时候就很清楚了：</p>
+<figure data-type="image" tabindex="4"><img src="https://s2.loli.net/2022/06/21/jPTobYLNdn6sgcH.png" alt="image-20220621110503710" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="https://s2.loli.net/2022/06/21/PaACqnRBTNXkESY.png" alt="image-20220621110555759" loading="lazy"></figure>
+<p>那么如果现在我们想要在任何位置都能使用一个变量，该怎么办呢？这时就要用到全局变量了：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test();
+
+int a = 10;   //我们可以直接将变量定义放在外面，这样所有的函数都可以访问了
+
+int main() {
+    a += 10;
+    test();    //现在各位觉得，这两个操作完成后，a会是多少呢？
+    printf(&quot;%d&quot;, a);
+}
+
+void test(){
+    a += 10;
+}
+</code></pre>
+<figure data-type="image" tabindex="6"><img src="https://s2.loli.net/2022/06/21/Sdya9HZ7lDMTcIA.png" alt="image-20220621111319786" loading="lazy"></figure>
+<p>因为现在所有函数都能使用全局变量，所以这个结果不难得到。</p>
+<h3 id="函数参数和返回">函数参数和返回</h3>
+<p>我们的函数可以接受参数来完成任务，比如我们现在想要实现<strong>用一个函数计算两个数的和并输出到控制台。</strong></p>
+<p>这种情况我们就需要将我们需要进行加法计算的两个数，告诉函数，这样函数才能对这两个数求和，那么怎么才能告诉函数呢？我们可以通过设定参数：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test(int, int);   //函数原型中需要写上需要的参数类型，多个参数用逗号隔开，比如这里我们需要的就是两个int类型的参数
+
+int main() {
+
+}
+
+void test(int a, int b){  //函数具体定义中也要写上，这里的a和b我们称为形式参数（形参），等价于函数中的局部变量，作用域仅限此函数
+		printf(&quot;%d&quot;, a + b);
+}
+</code></pre>
+<p>那么现在定义完成了，该如何使用这个函数呢，还记得我们怎么使用<code>printf</code>函数的吗？我们只需要把它所需要的参数填入即可：</p>
+<pre><code class="language-c">int main() {
+    test(10, 20);   //这里直接填写一个常量、变量或是运算表达式都是可以的，我们称实际传入的值为实际参数（实参）
+}
+</code></pre>
+<p>可以看到，成功计算出结果：</p>
+<figure data-type="image" tabindex="7"><img src="https://s2.loli.net/2022/06/21/dauFW2DNL3PnvYG.png" alt="image-20220621113243405" loading="lazy"></figure>
+<p>实际上我们传入的实参在进入到函数时，会自动给函数中形参（局部变量）进行赋值，这样我们在函数中就可以得到外部传入的参数值了。</p>
+<figure data-type="image" tabindex="8"><img src="https://s2.loli.net/2022/06/23/8zv1O5ZYAQTJNoV.png" alt="image-20220623224355944" loading="lazy"></figure>
+<p>我们来看看<code>printf</code>函数是怎么写的：</p>
+<pre><code class="language-c">int  printf(const char * __restrict, ...) __printflike(1, 2);   //看起来比较高级
+</code></pre>
+<p>这里我们主要关心它的两个参数，一个是<code>char *</code>由于还没有学习指针，这里就把它当做<code>const char[]</code>就行了，表示一个不可修改的字符串，而第二个参数我们看到是<code>...</code>，这三个点是个啥？</p>
+<p>我们知道，如果我们想要填写具体需要打印的值时，可以一直往后写：</p>
+<pre><code class="language-c">printf(&quot;%d, %d&quot;, 1, 2);   //参数可以一直写
+</code></pre>
+<p>正常情况下我们函数的参数列表都是固定的，怎么才能像这样写很多个呢？这就要用到可变长参数了，不过可变长参数的使用比较麻烦，这里我们就不做讲解了。</p>
+<p>这里给大家提一个问题，如果我们修改形式参数的值，外面的实参值会跟着发生修改吗？</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void swap(int, int);
+
+int main() {
+    int a = 10, b = 20;
+    swap(a, b);
+
+    printf(&quot;a = %d, b = %d&quot;, a, b);   //最后会得到什么结果？
+}
+
+void swap(int a, int b){
+    int tmp = a;   //这里对a和b的值进行交换
+    a = b;
+    b = tmp;
+}
+</code></pre>
+<figure data-type="image" tabindex="9"><img src="https://s2.loli.net/2022/06/23/5QbExfHNM76pBOY.png" alt="image-20220623224752943" loading="lazy"></figure>
+<p>通过结果发现，虽然调用了函数对a和b的值进行交换，但貌似并没有什么卵用。这是为什么呢？</p>
+<p>还记得我们前面说的吗，函数的形参实际上就是函数内的局部变量，它的作用域仅仅是这个函数，而我们外面传入的实参，仅仅知识将值赋值给了函数内的形参而已，并且外部的变量跟函数内部的变量作用域都不同，所以半毛钱关系都没有，这里交换的仅仅是函数内部的两个形参变量值，跟外部作实参的变量没有任何关系。</p>
+<p>那么，怎么样才能实现通过函数交换两个变量的值呢？这个问题我们会在指针部分进行讨论。</p>
+<p>不过数组却不受限制，我们在函数中修改数组的值，是直接可以生效的：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test(int arr[]);
+
+int main() {
+    int arr[] = {4, 3, 8, 2, 1, 7, 5, 6, 9, 0};
+    test(arr);
+    printf(&quot;%d&quot;, arr[0]);  //打印的是修改后的值了
+}
+
+void test(int arr[]) {
+    arr[0] = 999;   //数组就可以做到这边修改，外面生效
+}
+</code></pre>
+<p>我们再来看一个例子：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test(int a){
+    a += 10;
+    printf(&quot;%d\n&quot;, a);
+}
+
+int main() {
+    int a = 10;
+    test(a);
+    test(a);   //连续两次调用，那么这两次的结果会是什么？
+}
+</code></pre>
+<p>可以看到结果都是20，（如果猜对了可以直接跳过，如果你猜测的是20和30的话，需要听我解释了）注意每次调用函数都是单独进行的，并不是复用函数中的形参，不要认为第一次调用函数test就将函数的局部变量变成20了，再次调用就是20+10变成30。实际上这两次调用都是单独进行的，形参a都是在一开始的时候被赋值为实参的值的，这两次调用没有任何关系，并且函数执行完毕后就自动销毁了。</p>
+<p>那要是我就希望每次调用函数时保留变量的值呢？我们可以使用静态变量：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test();
+
+int main() {
+    test();
+    test();
+}
+
+void test() {
+    static int a = 20;   //静态变量并不会在函数结束时销毁其值，而是保持
+    a += 20;
+    printf(&quot;%d &quot;, a);
+}
+</code></pre>
+<p>我们接着来看函数的返回值，并不是所有的函数都是执行完毕就结束了的，可能某些时候我们需要函数告诉我们执行的结果如何，这时我们就需要用到返回值了，比如现在我们希望实现一个函数计算a+b的值：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int sum(int ,int );   //现在我们要返回a和b的和（那么肯定也是int类型）所以这里需要将返回值类型修改为int
+
+int main() {
+    int a = 10, b = 20;   //计算a和b的和
+  	int result = sum(a, b);   //函数执行后，会返回一个int类型的结果，我们可以接收它，也可以像下面一样直接打印，当然也可以参与运算等等。
+    printf(&quot;a+b=%d&quot;, sum(a, b));
+}
+
+int sum(int a, int b) {
+    return a + b;   //通过return关键字来返回计算的结果
+}
+</code></pre>
+<p>我们接着来看下一个例子，现在我们希望你通过函数找到数组中第一个小于0的数字并将其返回，如果没有找到任何小于0的数，就返回0即可：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int findMin(int arr[], int len);   //需要两个参数，一个是数组本身，还有一个是数组的长度
+
+int main() {
+    int arr[] = {1, 4, -9, 2, -4, 7};
+    int min = findMin(arr, 6);
+    printf(&quot;第一个小于0的数是：%d&quot;, min);
+}
+
+int findMin(int arr[], int len) {
+    for (int i = 0; i &lt; len; ++i) {
+        if(arr[i] &lt; 0) return arr[i];   //当判断找到后，直接return返回即可，这样的话函数会直接返回结果，无论后面还有没有代码没有执行完，整个函数都会直接结束。
+    }
+    return 0;   //如果没有找到就返回0
+}
+</code></pre>
+<figure data-type="image" tabindex="10"><img src="https://s2.loli.net/2022/06/23/fRw8nbV15dQGIUH.png" alt="image-20220623231617525" loading="lazy"></figure>
+<p>这里我们使用了<code>return</code>关键字来返回结果，注意当我们的程序走到<code>return</code>时，无论还有什么内容没执行完，整个函数都将结束，并返回结果。注意带返回值（非void）的函数中的所有情况都需要有一个对应的返回值：</p>
+<pre><code class="language-c">int test(int a) {
+    if (a &gt; 0) {
+        return 10;   //当a大于0时有返回语句
+    } else{
+          //但是当a不大于0时就没有返回值了，这样虽然可以编译通过，但是会有警告（黄标），运行后可能会出现一些无法预知的问题
+    }
+}
+</code></pre>
+<p>如果是没有返回值的函数，我们也可以调用<code>return</code>来返回，不过默认情况下是可以省略的：</p>
+<pre><code class="language-c">void test(int a){
+    if(a == 10) return;   //因为是void，所以什么都不需要加，直接return
+    printf(&quot;%d&quot;, a);
+}
+</code></pre>
+<h3 id="递归调用">递归调用</h3>
+<p>我们的函数除了在其他地方被调用之外，也可以自己调用自己（好家伙，套娃是吧），这种玩法我们称为递归。</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void test(){
+    printf(&quot;Hello World!\n&quot;);
+    test();   //函数自己在调用自己，这样的话下一轮又会进入到这个函数中
+}
+
+int main() {
+    test();
+}
+</code></pre>
+<p>我们可以尝试运行一下上面的程序，会发现程序直接无限打印<code>Hello World!</code>这个字符串，这是因为函数自己在调用自己，不断地重复进入到这个函数，理论情况下，它将永远都不会结束，而是无限地执行这个函数的内容。</p>
+<figure data-type="image" tabindex="11"><img src="https://s2.loli.net/2022/06/23/feq6xUPDjSLAKYF.png" alt="image-20220623233305190" loading="lazy"></figure>
+<p>但是到最后我们的程序还是终止了，这是因为函数调用有最大的深度限制，因为计算机不可能放任函数无限地进行下去。</p>
+<blockquote>
+<p><strong>（选学）<strong>我们来大致了解一下函数的调用过程，实际上在程序运行时会有一个叫做</strong>函数调用栈</strong>的东西，它用于控制函数的调用：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;   //我们以下面的调用关系为例
+
+void test2(){
+ printf(&quot;giao&quot;);
+}
+
+void test(){
+ test2();   //main -&gt; test -&gt; test2
+	printf(&quot;giao&quot;);
+}
+
+int main() {
+ test();
+	printf(&quot;giao&quot;);
+}
+</code></pre>
+<p>其实我们可以很轻易地看出整个调用关系，首先是从main函数进入，然后调用test函数，在test函数中又调用了test2函数，此时我们就需要等待test2函数执行完毕，test才能继续，而main则需要等待test执行完毕才能继续。而实际上这个过程是由函数调用栈在控制的：</p>
+<figure data-type="image" tabindex="12"><img src="https://s2.loli.net/2022/06/23/lAfGyoDWBstz6bm.png" alt="image-20220623235007335" loading="lazy"></figure>
+<p>而当test2函数执行完毕后，每个栈帧又依次从栈中出去：</p>
+<figure data-type="image" tabindex="13"><img src="https://s2.loli.net/2022/06/23/IWYsq8m2htNeEaP.png" alt="image-20220623235649397" loading="lazy"></figure>
+<p>当所有的栈全部出去之后，程序结束。</p>
+<p>所以这也就不难解释为什么无限递归会导致程序出现错误，因为栈的空间有限，而函数又一直在进行自我调用，所以会导致不断地有新的栈帧进入，最后塞满整个栈的空间，就爆炸了，这种问题我们称为栈溢出（Stack Overflow）</p>
+</blockquote>
+<p>当然，如果我们好好地按照规范使用递归操作，是非常方便的，比如我们现在需要求某个数的阶乘：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int test(int n);
+
+int main() {
+    printf(&quot;%d&quot;, test(3));
+}
+
+int test(int n){
+    if(n == 1) return 1;   //因为不能无限制递归下去，所以我们这里添加一个结束条件，在n = 1时返回
+    return test(n - 1) * n;  //每次都让n乘以其下一级的计算结果，下一级就是n-1了
+}
+</code></pre>
+<p>通过给递归调用适当地添加结束条件，这样就不会无限循环了，并且我们的程序看起来无比简洁，那么它是如何执行的呢：</p>
+<figure data-type="image" tabindex="14"><img src="https://s2.loli.net/2022/06/24/SsJWqGKyQko47Mm.png" alt="image-20220624002051266" loading="lazy"></figure>
+<p>它看起来就像是一个先走到底部，然后拿到问题的钥匙后逐步返回的一个过程，并在返回的途中不断进行计算最后得到结果（妙啊）</p>
+<p>所以，合理地使用递归反而是一件很有意思的事情。</p>
+<h3 id="实战斐波那契数列解法其三">实战：斐波那契数列解法其三</h3>
+<p>前面我们介绍了函数的递归调用，我们来看一个具体的实例吧，我们还是以解斐波那契数列为例。</p>
+<p>既然每个数都是前两个数之和，那么我们是否也可以通过递归的形式不断划分进行计算呢？我们依然可以借鉴之前动态规划的思想，通过划分子问题，分而治之来完成计算。</p>
+<h3 id="实战汉诺塔">实战：汉诺塔</h3>
+<p>什么是汉诺塔？</p>
+<blockquote>
+<p><strong>汉诺塔</strong>（Tower of Hanoi），又称<strong>河内塔</strong>，是一个源于<a href="https://baike.baidu.com/item/%E5%8D%B0%E5%BA%A6/121904">印度</a>古老传说的<a href="https://baike.baidu.com/item/%E7%9B%8A%E6%99%BA%E7%8E%A9%E5%85%B7/223159">益智玩具</a>。<a href="https://baike.baidu.com/item/%E5%A4%A7%E6%A2%B5%E5%A4%A9/711550">大梵天</a>创造世界的时候做了三根金刚石柱子，在一根柱子上从下往上按照大小顺序摞着64片黄金圆盘。大梵天命令<a href="https://baike.baidu.com/item/%E5%A9%86%E7%BD%97%E9%97%A8/1796550">婆罗门</a>把圆盘从下面开始</p>
+<p><strong>按大小顺序重新摆放在另一根柱子上。并且规定，在小圆盘上不能放大圆盘，在三根柱子之间一次只能移动一个圆盘。</strong></p>
+</blockquote>
+<figure data-type="image" tabindex="15"><img src="https://s2.loli.net/2022/06/24/Z7iN526FOQLS3Kz.png" alt="image-20220624002507501" loading="lazy"></figure>
+<p>这三根柱子我们就依次命名为A、B、C，现在请你设计一个C语言程序，计算N阶（n片圆盘）汉诺塔移动操作的每一步。</p>
+<p>这个问题看似很难，实际上我们也可以对每一步进行推理：</p>
+<blockquote>
+<p>当汉诺塔只有1阶的情况下：直接把A上的圆盘移动到C，搞定。</p>
+</blockquote>
+<blockquote>
+<p>当汉诺塔只有2阶的情况下：我们的最终目标还是需要将A柱最下面的圆盘丢到C，不过现在多了圆盘，我们得先把这个圆盘给处理了，所以我们得把这上面的1个圆盘丢到B上去，这样才能把A最下面的圆盘丢给C。然后再把B上面的1个圆盘丢到C上去</p>
+</blockquote>
+<blockquote>
+<p>当汉诺塔只有3阶的情况下：我们的最终目标还是需要将A柱最下面的圆盘丢到C，不过现在多了圆盘，我们得先把这个圆盘给处理了，所以我们得把这上面的2个圆盘丢到B上去，这样才能把A最下面的圆盘丢给C。然后再把B上面的2个圆盘丢到C上</p>
+</blockquote>
+<p>实际上我们发现，把A移动到C是一定要进行的，而在进行之前需要先把压在上面全部的圆盘全部放到B去。而移动之后也要把B上的圆盘全部移动到C上去。其实所有的情况下最终都会有一个n=1的情况，将A上的最后一个圆盘移动到C，只是多了一个前面的步骤和后面的步骤。</p>
+<p>不过难点就是，怎么把A上的n-1个圆盘移动到B去呢？其实这时我们可以依靠C作为中间商，来帮助我们移动（比如n = 3，那么先把最上面的移动到C，然后把第二大的移动到B，再从C上把最小的移动到B上，这样就借助了C完成了两个圆盘的转移），而最后又怎么把B上的圆盘全部移到C去呢，这时就可以依靠A作为中间商，方法同理；实际上大问题最后都会变成n = 2时这样的小问题，只不过是要移动目标不同罢了。</p>
+<p>只要想通了怎么去借助中间商进行移动，就很好写出程序了。</p>
+<p>递归函数如下设计：</p>
+<pre><code class="language-c">//a存放圆盘的初始柱子，b作为中间柱子存放使用，c作为目标柱子，n表示要从a移动到c的圆盘数
+void hanoi(char a, char b, char c, int n){
+    
+}
+</code></pre>
+<p>现在我们来实现一下吧。</p>
+<pre><code class="language-c">void move(char start, char end, int n){   //用于打印移动操作到控制台，start是起始柱子，end是结束柱子，n是哪一个圆盘
+    printf(&quot;第%d个圆盘：%c --&gt; %c\n&quot;, n, start, end);
+}
+
+void hanoi(char a, char b, char c, int n){  //刚进来的时候，B作为中间柱子，C作为目标柱子，要移动A上的n个圆盘到C去
+    if(n == 1) {
+        move(a, c, n);   //无论a,b,c如何变换，通过递归，最后都会变成一个n = 1的问题，直接移动就完事了
+    } else{
+        hanoi(a, c ,b, n - 1);  //首要目标是先把上面n-1个圆盘全部放到B去，这里就变换一下，让B作为目标柱子，C作为中间
+        move(a, c, n);   //现在A上只剩下一个最大的圆盘了，接着把A最下方的一个圆盘移到C去
+        hanoi(b, a, c, n - 1);   //最后需要把B上的全部搬到C上去，这里就可以以C为目标柱子，A为中间柱子
+    }
+}
+</code></pre>
+<p>简化一波：</p>
+<pre><code class="language-c">void hanoi(char a, char b, char c, int n){
+    if(n == 0) return;
+    hanoi(a, c ,b, n - 1);
+    printf(&quot;第%d个圆盘：%c --&gt; %c\n&quot;, n, a, c);
+    hanoi(b, a, c, n - 1);
+}
+</code></pre>
+<p>看似如此复杂的问题，其实只需要4行就可以解决了。</p>
+<h3 id="实战快速排序算法选学">实战：快速排序算法（选学）</h3>
+<p>有一个数组：</p>
+<pre><code class="language-c">int arr[] = {4, 3, 8, 2, 1, 7, 5, 6, 9, 0};
+</code></pre>
+<p>现在请你设计一个C语言程序，对数组按照从小到大的顺序进行排序。这里我们使用冒泡排序的进阶版本——<strong>快速排序</strong>来完成，它的核心思想是分而治之，每一轮排序都会选出一个基准，一轮排序完成后，所以比基准小的数一定在左边，比基准大的数一定在右边，在分别通过同样的方法对左右两边的数组进行排序，不断划分，最后完成整个数组的排序。它的效率相比冒泡排序的双重for循环有所提升。</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void quickSort(int arr[], int left, int right){  //arr是数组，left是起始下标，right是结束下标
+    //请实现这一部分
+}
+
+int main() {
+    int arr[] = {4, 3, 8, 2, 1, 7, 5, 6, 9, 0};
+    quickSort(arr, 0, 9);  //10个数字下标就是0-9
+    for (int i = 0; i &lt; 10; ++i) {
+        printf(&quot;%d &quot;, arr[i]);
+    }
+}
+</code></pre>
+<p>不过虽然这种排序算法很快，但是极端情况下（比如遇到了刚好倒序的数组）还是会退化成冒泡排序的。</p>
+<hr>
+<h2 id="指针">指针</h2>
+<p>指针可以说是整个C语言中最难以理解的部分了，不过其实说简单也简单，你会发现也并没有想象中的那么难，你与它的距离可能只差了那么一些基础知识，这一部分都会及时进行补充的。</p>
+<h3 id="什么是指针">什么是指针</h3>
+<p>还记得我们在上一个部分谈到的通过函数交换两个变量的值吗？</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+void swap(int, int);
+
+int main() {
+    int a = 10, b = 20;
+    swap(a, b);
+
+    printf(&quot;a = %d, b = %d&quot;, a, b);   //最后会得到什么结果？
+}
+
+void swap(int a, int b){
+    int tmp = a;   //这里对a和b的值进行交换
+    a = b;
+    b = tmp;
+}
+</code></pre>
+<p>实际上这种写法是错误的，因为交换的并非是真正的a和b，而是函数中的局部变量。那么有没有办法能够直接对函数外部的变量进行操作呢？这就需要指针的帮助了。</p>
+<p>我们知道，程序中使用的变量实际上都在内存中创建的，每个变量都会被保存在内存的某一个位置上（具体在哪个位置是由系统分配的），就像我们最终会在这个世界上的某个角落安家一样，所有的变量在对应的内存位置上都有一个地址（地址是独一无二的），而我们可以通过这个地址寻找到这个变量本体，比如int占据4字节，因此int类型变量的地址就是这4个字节的起始地址，后面32个bit位全部都是用于存放此变量的值的。</p>
+<figure data-type="image" tabindex="16"><img src="https://s2.loli.net/2022/06/24/zi5ZwxK76REpYUI.png" alt="image-20220624221635066" loading="lazy"></figure>
+<p>这里的<code>0x</code>是十六进制的表示形式（10-15用字母A - F表示）如果我们能够知道变量的内存地址，那么无论身在何处，都可以通过地址找到这个变量了。而指针的作用，就是专门用来保存这个内存地址的。</p>
+<p>我们来看看如何创建一个指针变量用于保存变量的内存地址：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a = 10;
+  	//指针类型需要与变量的类型相同，且后面需要添加一个*符号（注意这里不是乘法运算）表示是对于类型的指针
+    int * p = &amp;a;   //这里的&amp;并不是进行按位与运算，而是取地址操作，也就是拿到变量a的地址
+    printf(&quot;a在内存中的地址为：%p&quot;, p);  //地址使用%p表示
+}
+</code></pre>
+<figure data-type="image" tabindex="17"><img src="https://s2.loli.net/2022/06/24/Pb3cWuOFIMkJLEa.png" alt="image-20220624222718731" loading="lazy"></figure>
+<p>可以看到，我们通过取地址操作<code>&amp;</code>，将变量a的地址保存到了一个地址变量<code>p</code>中。</p>
+<p>拿到指针之后，我们可以很轻松地获取指针所指地址上的值：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a = 666;
+    int * p = &amp;a;
+    printf(&quot;内存%p上存储的值为：%d&quot;, p, *p);   //我们可以在指针变量前添加一个*号（间接运算符，也可以叫做解引用运算符）来获取对应地址存储的值
+}
+</code></pre>
+<p>注意这里访问指针所指向地址的值时，是根据类型来获取的，比如int类型占据4个字节，那么就读取地址后面4个字节的内容作为一个int值，如果指针是char类型的，那么就只读取地址后面1个字节作为char类型的值。</p>
+<figure data-type="image" tabindex="18"><img src="https://s2.loli.net/2022/06/24/GHS8UAoKNT6vZXy.png" alt="image-20220624224026228" loading="lazy"></figure>
+<p>同样的，我们也可以直接像这样去修改对应地址存放的值：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a = 666;
+    int * p = &amp;a;
+
+    *p = 999;   //通过*来访问对应地址的值，并通过赋值运算对其进行修改
+
+    printf(&quot;a的值为：%d&quot;, a);
+}
+</code></pre>
+<figure data-type="image" tabindex="19"><img src="https://s2.loli.net/2022/06/24/3gFKBEuRQlD8wpq.png" alt="image-20220624225026394" loading="lazy"></figure>
+<p>实际上拿到一个变量的地址之后，我们完全不需要再使用这个变量，而是可以通过它的指针来对其进行各种修改。因此，现在我们想要实现对两个变量的值进行交换的函数就很简单了：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+// 这里是两个指针类型的形参，其值为实参传入的地址，
+// 虽然依然是值传递，但是这里传递的可是地址啊，
+// 只要知道地址改变量还不是轻轻松松？
+void swap(int * a, int * b){
+    int tmp = *a;   //先暂存一下变量a地址上的值
+    *a = *b;   //将变量b地址上的值赋值给变量a对应的位置
+    *b = tmp;   //最后将a的值赋值给b对应位置，OK，这样就成功交换两个变量的值了
+}
+
+int main(){
+    int a = 10, b = 20;
+    swap(&amp;a, &amp;b);   //只需要把a和b的内存地址给过去就行了，这里取一下地址
+    printf(&quot;a = %d, b = %d&quot;, a, b);
+}
+</code></pre>
+<figure data-type="image" tabindex="20"><img src="https://s2.loli.net/2022/06/24/8U6pSiKeEFTg2H4.png" alt="image-20220624225800731" loading="lazy"></figure>
+<p>通过地址操作，我们就轻松实现了使用函数交换两个变量的值了。</p>
+<p>了解了指针的相关操作之后，我们再来看看<code>scanf</code>函数，实际上就很好理解了：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a;
+    scanf(&quot;%d&quot;, &amp;a);   //这里就是取地址，我们需要告诉scanf函数变量的地址，这样它才能通过指针访问变量的内存地址，对我们变量的值进行修改，这也是为什么scanf里面的变量（除数组外）前面都要进行一个取地址操作
+    printf(&quot;%d&quot;, a);
+}
+</code></pre>
+<p>当然，和变量一样，要是咱们不给指针变量赋初始值的话，就不知道指的哪里了，因为指针变量也是变量，存放的其他变量的地址值也在内存中保存，如果不给初始值，那么存放别人地址的这块内存可能在其他地方使用过，这样就不知道初始值是多少了（那么指向的地址可能是一个很危险的地址，随意使用可能导致会出现严重错误），所以一定要记得给个初始值或是将其设定为NULL，表示空指针，不指向任何内容。</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int * a = NULL;
+}
+</code></pre>
+<p>我们接着来看看<code>const</code>类型的指针，这种指针比较特殊：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a = 9, b = 10;
+    const int * p = &amp;a;
+    *p = 20;   //这里直接报错，因为被const标记的指针，所指地址上的值不允许发生修改
+  	p = &amp;b;   //但是指针指向的地址是可以发生改变的
+}
+</code></pre>
+<p>我们再来看另一种情况：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a = 9, b = 10;
+    int * const p = &amp;a;   //const关键字被放在了类型后面
+    *p = 20;   //允许修改所指地址上的值
+    p = &amp;b;   //但是不允许修改指针存储的地址值，其实就是反过来了。
+}
+</code></pre>
+<p>当然也可以双管齐下：</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    int a = 9, b = 10;
+    const int * const p = &amp;a;
+    *p = 20;   //两个都直接报错，都不让改了
+    p = &amp;b;
+}
+</code></pre>
+<h3 id="指针与数组">指针与数组</h3>
+<p>前面我们介绍了指针的基本使用，我们来回顾一个问题，为什么数组可以以原身在函数之间进行传递呢？先说结论，数组表示法实际上是在变相地使用指针，你甚至可以将其理解为数组变量其实就是一个指针变量，它存放的就是数组中第一个元素的起始地址。</p>
+<p>为什么这么说？</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main(){
+    char str[] = &quot;Hello World!&quot;;
+    char * p = str;   //？？？啥情况，为什么能直接把数组作为地址赋值给指针变量p？？？
+
+    printf(&quot;%c&quot;, *p);   //还能正常使用，打印出第一个字符？？？
+}
+</code></pre>
+<figure data-type="image" tabindex="21"><img src="https://s2.loli.net/2022/06/24/WaPeLR8o295YpsC.png" alt="image-20220624231833371" loading="lazy"></figure>
+<p>你以为这就完了？还能这样玩呢：</p>
+<pre><code class="language-c">int main(){
+    char str[] = &quot;Hello World!&quot;;
+    char * p = str;
+
+    printf(&quot;%c&quot;, p[1]);   //？？？怎么像在使用数组一样用指针？？？
+}
+</code></pre>
+<figure data-type="image" tabindex="22"><img src="https://s2.loli.net/2022/06/24/hV6orYOmebDRyJG.png" alt="image-20220624232337311" loading="lazy"></figure>
+<p>太迷了吧，怎么数组和指针还能这样混着用呢？我们先来看看数组在内存中是如何存放的：</p>
+<figure data-type="image" tabindex="23"><img src="https://s2.loli.net/2022/06/24/ij6eKTYqDSxL7tE.png" alt="image-20220624233249216" loading="lazy"></figure>
+<p>数组在内存中是一块连续的空间，所以为什么声明数组一定要明确类型和大小，因为这一块连续的内存空间生成后就固定了。</p>
+<p>而我们的数组变量实际上存放的就是首元素的地址，而实际上我们之前一直使用的都是<strong>数组表示法</strong>来操作数组，这样可以很方便地让我们对内存中的各个元素值进行操作：</p>
+<pre><code class="language-c">int main(){
+    char str[] = &quot;Hello World!&quot;;
+    printf(&quot;%c&quot;, str[0]);   //直接在中括号中输入对应的下标就能访问对应位置上的数组了
+}
+</code></pre>
+<p>而我们知道实际上<code>str</code>表示的就是数组的首地址，所以我们完全可以将其赋值给一个指针变量，因为指针变量也是存放的地址：</p>
+<pre><code class="language-c">char str[] = &quot;Hello World!&quot;;
+char * p = str;   //直接把str代表的首元素地址给到p
+</code></pre>
+<p>而使用指针后，实际上我们可以使用另一种表示法来操作数组，这种表示法叫做<strong>指针表示法</strong>：</p>
+<pre><code class="language-c">int main(){
+    char str[] = &quot;Hello World!&quot;;
+    char * p = str;
+
+    printf(&quot;第一个元素值为：%c，第二个元素值为：%c&quot;, *p, *(p+1));   //通过指针也可以表示对应位置上的值
+}
+</code></pre>
+<p>比如我们现在需要表示数组中的第二个元素：</p>
+<ul>
+<li>数组表示法：<code>str[1]</code></li>
+<li>指针表示法：<code>*(p+1)</code></li>
+</ul>
+<p>虽然写法不同，但是他们表示的意义是完全相同的，都代表了数组中的第二个元素，其中指针表示法使用了<code>p+1</code>的形式表示第二个元素，这里的<code>+1</code>操作并不是让地址+1，而是让地址<code>+ 一倍的对应类型大小</code>，也就是说地址后移一个char的长度，所以正好指向了第二个元素，然后通过<code>*</code>取到对应的值（注意这种操作仅对数组是有意义的，如果是普通的变量，虽然也可以通过这种方式获得后一个char的长度的数据，但是毫无意义）</p>
+<pre><code class="language-c">*(p+i)   &lt;=&gt;    str[i]    //实际上就是可以相互转换的
+</code></pre>
+<p>这两种表示法都可以对内存中存放的数组内容进行操作，只是写法不同罢了，所以你会看到数组和指针混用也就不奇怪了。了解了这些东西之后，我们来看看下面的各个表达式分别代表什么：</p>
+<pre><code class="language-c">*p   //数组的第一个元素
+p   //数组的第一个元素的地址
+p == str   //肯定是真，因为都是数组首元素地址
+*str    //因为str就是首元素的地址，所以这里对地址加*就代表第一个元素，使用的是指针表示法
+&amp;str[0]   //这里得到的实际上还是首元素的地址
+*(p + 1)   //代表第二个元素
+p + 1    //第二个元素的内存地址
+*p + 1    //注意*的优先级比+要高，所以这里代表的是首元素的值+1，得到字符'K'
+</code></pre>
+<p>所以不难理解，为什么<code>printf</code>函数的参数是一个<code>const char * </code>了，实际上就是需要我们传入一个字符串而已，只不过这里采用的是指针表示法而已。</p>
+<p>当然指针也可以进行自增和自减操作，比如：</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#c%E8%AF%AD%E8%A8%80%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7">C语言高级特性</a>
+<ul>
+<li><a href="#%E5%87%BD%E6%95%B0">函数</a>
+<ul>
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%92%8C%E4%BD%BF%E7%94%A8%E5%87%BD%E6%95%B0">创建和使用函数</a></li>
+<li><a href="#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E5%92%8C%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F">全局变量和局部变量</a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0%E5%92%8C%E8%BF%94%E5%9B%9E">函数参数和返回</a></li>
+<li><a href="#%E9%80%92%E5%BD%92%E8%B0%83%E7%94%A8">递归调用</a></li>
+<li><a href="#%E5%AE%9E%E6%88%98%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97%E8%A7%A3%E6%B3%95%E5%85%B6%E4%B8%89">实战：斐波那契数列解法其三</a></li>
+<li><a href="#%E5%AE%9E%E6%88%98%E6%B1%89%E8%AF%BA%E5%A1%94">实战：汉诺塔</a></li>
+<li><a href="#%E5%AE%9E%E6%88%98%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E9%80%89%E5%AD%A6">实战：快速排序算法（选学）</a></li>
+</ul>
+</li>
+<li><a href="#%E6%8C%87%E9%92%88">指针</a>
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8C%87%E9%92%88">什么是指针</a></li>
+<li><a href="#%E6%8C%87%E9%92%88%E4%B8%8E%E6%95%B0%E7%BB%84">指针与数组</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://dengbowang.github.io/post/c1/">
+              <h3 class="post-title">
+                c1
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://dengbowang.github.io//atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
